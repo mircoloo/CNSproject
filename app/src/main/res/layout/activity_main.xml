@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
@@ -26,97 +27,97 @@
         android:orientation="horizontal"
         android:rowCount="4">
 
+        <!-- Buttons tagged with "button" -->
         <Button
             android:id="@+id/button0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onButtonClick"
-            android:text="0"
             android:padding="20dp"
-            android:layout_margin="10dp"/>
+            android:layout_margin="10dp"
+            android:tag="button"
+            android:onClick="onClicked" />
 
         <Button
             android:id="@+id/button1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onButtonClick"
-            android:text="1"
+            android:layout_margin="10dp"
             android:padding="20dp"
-            android:layout_margin="10dp" />
+            android:tag="button"
+            android:onClick="onClicked" />
 
         <Button
             android:id="@+id/button2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onButtonClick"
-            android:text="2"
             android:padding="20dp"
-            android:layout_margin="10dp" />
+            android:layout_margin="10dp"
+            android:tag="button"
+            android:onClick="onClicked" />
 
         <Button
             android:id="@+id/button3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onButtonClick"
-            android:text="3"
             android:padding="20dp"
-            android:layout_margin="10dp" />
+            android:layout_margin="10dp"
+            android:tag="button"
+            android:onClick="onClicked" />
 
         <Button
             android:id="@+id/button4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onButtonClick"
-            android:text="4"
             android:padding="20dp"
-            android:layout_margin="10dp" />
+            android:layout_margin="10dp"
+            android:tag="button"
+            android:onClick="onClicked" />
 
         <Button
             android:id="@+id/button5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onButtonClick"
-            android:text="5"
             android:padding="20dp"
-            android:layout_margin="10dp" />
+            android:layout_margin="10dp"
+            android:tag="button"
+            android:onClick="onClicked" />
 
         <Button
             android:id="@+id/button6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onButtonClick"
-            android:text="6"
             android:padding="20dp"
-            android:layout_margin="10dp" />
+            android:layout_margin="10dp"
+            android:tag="button"
+            android:onClick="onClicked" />
 
         <Button
             android:id="@+id/button7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onButtonClick"
-            android:text="7"
             android:padding="20dp"
-            android:layout_margin="10dp" />
+            android:layout_margin="10dp"
+            android:tag="button"
+            android:onClick="onClicked" />
 
         <Button
             android:id="@+id/button8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onButtonClick"
-            android:text="8"
+            android:layout_margin="10dp"
+            android:onClick="onClicked"
             android:padding="20dp"
-            android:layout_margin="10dp" />
+            android:tag="button" />
 
         <Button
             android:id="@+id/button9"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onButtonClick"
-            android:text="9"
             android:padding="20dp"
-            android:layout_margin="10dp" />
+            android:layout_margin="10dp"
+            android:tag="button"
+            android:onClick="onClicked" />
 
     </GridLayout>
-
 
 </LinearLayout>
