@@ -2,6 +2,7 @@ package com.example.test1ca;
 
 
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -97,9 +98,38 @@ public class MainActivity extends AppCompatActivity {
 
         displayText.setText(textToWrite);
 
-
-
         return;
     }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        EditText displayData = (EditText) findViewById(R.id.display_data);
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int screenWidth = displayMetrics.widthPixels; // Larghezza totale dello schermo in pixel
+        int screenHeight = displayMetrics.heightPixels; // Altezza totale dello schermo in pixel
+        String toDisplay = String.valueOf(displayData.getText());
+
+        // Calcola il numero di pixel toccati utilizzando la grandezza totale dello schermo
+        int totalPixels = screenWidth * screenHeight;
+        float touchedAreaSize = event.getSize() * totalPixels;
+
+        float touchMajor = event.getTouchMajor();
+        float touchMinor = event.getTouchMinor();
+
+        float touchedArea = (float) (Math.PI * (touchMajor / 2) * (touchMinor / 2));
+
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            toDisplay = event.getPressure() +  " (" + event.getX() + "," + event.getY() + ")\n" + "Size (px): " + touchedAreaSize + "\n GTM: " + touchMajor + ", GTm: " + touchMinor + ", Size (px): " + touchedArea;
+            Log.d("TouchEvent", event.getPressure() +  " (" + event.getX() + "," + event.getY() + ")");
+            Log.d("TouchEvent",  "GetSize() --- Size (%): " + event.getSize() + ", Size (px): " + touchedAreaSize);
+            Log.d("TouchEvent",  "GetTouchMajor() GetTouchMinor() --- GetTouchMajor: " + touchMajor + ", GetTouchMinor: " + touchMinor + ", Size (px): " + touchedArea);
+
+        }
+
+        displayData.setText(toDisplay);
+
+        return super.dispatchTouchEvent(event);
+    }
+
 
 }
