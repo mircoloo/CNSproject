@@ -91,13 +91,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         displayText.setText(textToWrite);
-
-        return;
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
-        EditText displayData = (EditText) findViewById(R.id.display_data);
+        EditText displayData = findViewById(R.id.display_data);
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         int screenWidth = displayMetrics.widthPixels; // Larghezza totale dello schermo in pixel
         int screenHeight = displayMetrics.heightPixels; // Altezza totale dello schermo in pixel
