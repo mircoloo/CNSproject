@@ -1,6 +1,5 @@
 package com.example.test1ca;
 
-
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -9,13 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -92,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("PINRESULT", "Wrong PIN");
             }
 
+
             textToWrite = "";
             initializeButtons();
         }
@@ -113,13 +107,14 @@ public class MainActivity extends AppCompatActivity {
         int totalPixels = screenWidth * screenHeight;
         float touchedAreaSize = event.getSize() * totalPixels;
 
+        //estimated area size using the ellipse axis
         float touchMajor = event.getTouchMajor();
         float touchMinor = event.getTouchMinor();
-
         float touchedArea = (float) (Math.PI * (touchMajor / 2) * (touchMinor / 2));
 
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            toDisplay = event.getPressure() +  " (" + event.getX() + "," + event.getY() + ")\n" + "Size (px): " + touchedAreaSize + "\n GTM: " + touchMajor + ", GTm: " + touchMinor + ", Size (px): " + touchedArea;
+            toDisplay =   "X:" + event.getX() + "\n Y:" + event.getY() + "\n" + " GTM: " + touchMajor + ", GTm: " + touchMinor +
+                    "\nEllipse Area : " + touchedAreaSize + "\n Actual Area : " + touchedArea;
             Log.d("TouchEvent", event.getPressure() +  " (" + event.getX() + "," + event.getY() + ")");
             Log.d("TouchEvent",  "GetSize() --- Size (%): " + event.getSize() + ", Size (px): " + touchedAreaSize);
             Log.d("TouchEvent",  "GetTouchMajor() GetTouchMinor() --- GetTouchMajor: " + touchMajor + ", GetTouchMinor: " + touchMinor + ", Size (px): " + touchedArea);
