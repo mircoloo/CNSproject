@@ -1,12 +1,14 @@
 package com.example.test1ca;
 
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;q
+import android.widget.Button;
 import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -34,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void csvWriter( String content ) throws IOException {
-        File file = new File( getFilesDir(), "data.csv");
+        File file = new File(getFilesDir() , "data.csv");
         FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
         BufferedWriter bw = new BufferedWriter(fw);
 
@@ -106,20 +108,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClicked(View v) throws IOException {
+        //display_text box
         View displayTextView = findViewById(R.id.display_text);
         EditText displayText = (EditText) displayTextView;
 
+        //display_ids box
         View displayIdsView = findViewById(R.id.display_ids);
         EditText displayIds = (EditText) displayIdsView;
-        String idsDisplay = String.valueOf(displayIds.getText());
 
-
+        //button
         Button b = (Button) v;
+
+//        String idsDisplay = String.valueOf(displayIds.getText());
+//        idsDisplay += String.valueOf(b.getId());
+//        displayIds.setText(idsDisplay);
+
         Log.d("button_ID", String.valueOf(b.getId()));
         csvWriter(String.valueOf(b.getId())+ "\n");
-
-        idsDisplay += String.valueOf(b.getId());
-        displayIds.setText(idsDisplay);
 
         String textToWrite = String.valueOf(displayText.getText()) + String.valueOf(b.getText());
 
@@ -133,39 +138,57 @@ public class MainActivity extends AppCompatActivity {
             textToWrite = "";
             initializeButtons();
         }
-
         displayText.setText(textToWrite);
-
-
 
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         EditText displayData = findViewById(R.id.display_data);
-        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-        int screenWidth = displayMetrics.widthPixels; // Larghezza totale dello schermo in pixel
-        int screenHeight = displayMetrics.heightPixels; // Altezza totale dello schermo in pixel
+        //DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         String toDisplay = String.valueOf(displayData.getText());
         String toWrite = "";
+
         // Calcola il numero di pixel toccati utilizzando la grandezza totale dello schermo
-        int totalPixels = screenWidth * screenHeight;
-        float touchedAreaSize = event.getSize() * totalPixels;
+        //int screenWidth = displayMetrics.widthPixels; // Larghezza totale dello schermo in pixel
+        //int screenHeight = displayMetrics.heightPixels; // Altezza totale dello schermo in pixel
+//        int totalPixels = screenWidth * screenHeight;
+//        float actualArea = event.getSize() * totalPixels;
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height=0;
+        if(showNavigationBar(getResources())){
+            height = displayMetrics.heightPixels + getNavigationBarHeight();
+        }
+        else {
+            height = displayMetrics.heightPixels;
+        }
+        int width = displayMetrics.widthPixels;
+
+        int totalPixels = height + width;
+        float actualArea = event.getSize() * totalPixels;
+
 
         //estimated area size using the ellipse axis
-        float touchMajor = event.getTouchMajor();
-        float touchMinor = event.getTouchMinor();
-        float touchedArea = (float) (Math.PI * (touchMajor / 2) * (touchMinor / 2));
-
+        double touchMajor = event.getTouchMajor();
+        double touchMinor = event.getTouchMinor();
+        double ellipseArea = (3.1415*(touchMajor*0.5)*(touchMinor*0.5));
 
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            toDisplay =   "X:" + event.getX() + "\n Y:" + event.getY() + "\n" + " GTM: " + touchMajor + ", GTm: " + touchMinor +
-                    "\nEllipse Area : " + touchedAreaSize + "\n Actual Area : " + touchedArea;
+            toDisplay =   "X:" + event.getX() + "\n Y:" + event.getY() + "\n"
+                    + " GTM: " + touchMajor + ", GTm: " + touchMinor
+                    + "\ngetSize " + event.getSize() +
+                    "\nEllipse Area : " + ellipseArea + "\n Actual Area : " + actualArea;
             Log.d("TouchEvent", event.getPressure() +  " (" + event.getX() + "," + event.getY() + ")");
-            Log.d("TouchEvent",  "GetSize() --- Size (%): " + event.getSize() + ", Size (px): " + touchedAreaSize);
-            Log.d("TouchEvent",  "GetTouchMajor() GetTouchMinor() --- GetTouchMajor: " + touchMajor + ", GetTouchMinor: " + touchMinor + ", Size (px): " + touchedArea);
-            toWrite = event.getX() + "," + event.getY() + "," + touchMajor + "," + touchMinor +
-                    "," + touchedAreaSize + "," + touchedArea + ",";
+            Log.d("TouchEvent",  "GetSize() --- Size (%): " + event.getSize() + ", Size (px): " + actualArea);
+            Log.d("TouchEvent",  "GetTouchMajor() GetTouchMinor() --- GetTouchMajor: " + touchMajor + ", GetTouchMinor: " + touchMinor + ", Size (px): " + ellipseArea);
+            toWrite = event.getX() + ","
+                    + event.getY() + ","
+                    + touchMajor + ","
+                    + touchMinor + ","
+                    + ellipseArea + ","
+                    + actualArea + ",";
             try {
                 csvWriter(toWrite);
             } catch (IOException e) {
@@ -179,6 +202,24 @@ public class MainActivity extends AppCompatActivity {
 
         return super.dispatchTouchEvent(event);
     }
-
+    public boolean showNavigationBar(Resources resources)
+    {
+        int id = resources.getIdentifier("config_showNavigationBar", "bool", "android");
+        return id > 0 && resources.getBoolean(id);
+    }
+    private int getNavigationBarHeight() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            int usableHeight = metrics.heightPixels;
+            getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
+            int realHeight = metrics.heightPixels;
+            if (realHeight > usableHeight)
+                return realHeight - usableHeight;
+            else
+                return 0;
+        }
+        return 0;
+    }
 
 }
