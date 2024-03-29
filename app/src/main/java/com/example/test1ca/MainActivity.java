@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.BufferedWriter;
@@ -51,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(file.length()<=0){
-            bw.write("X,Y, GTM, GTm, EA, AA, bID\n");
+            bw.write("UsID, X,Y, GTM, GTm, EA, AA, bID\n");
         }
 
         bw.write(content);
@@ -177,6 +179,8 @@ public class MainActivity extends AppCompatActivity {
         double touchMajor = event.getTouchMajor();
         double touchMinor = event.getTouchMinor();
         double ellipseArea = (3.1415*(touchMajor*0.5)*(touchMinor*0.5));
+        TextView userIdText = findViewById(R.id.selected_number);
+        String usId = String.valueOf(userIdText.getText());
 
         if (event.getAction() == MotionEvent.ACTION_MOVE) {
             toDisplay =   "{X:" + event.getX() + ",Y:" + event.getY() + "}\n"
@@ -187,7 +191,8 @@ public class MainActivity extends AppCompatActivity {
             Log.d("TouchEvent", event.getPressure() +  " (" + event.getX() + "," + event.getY() + ")");
             Log.d("TouchEvent",  "GetSize() --- Size (%): " + event.getSize() + ", Size (px): " + actualArea);
             Log.d("TouchEvent",  "GetTouchMajor() GetTouchMinor() --- GetTouchMajor: " + touchMajor + ", GetTouchMinor: " + touchMinor + ", Size (px): " + ellipseArea);
-            toWrite = event.getX() + ","
+            toWrite = usId + ","
+                    + event.getX() + ","
                     + event.getY() + ","
                     + touchMajor + ","
                     + touchMinor + ","
@@ -226,4 +231,15 @@ public class MainActivity extends AppCompatActivity {
         return 0;
     }
 
+    public void changeUser(View v) {
+        TextView userIdText = findViewById(R.id.selected_number);
+        int currId = Integer.parseInt(String.valueOf(userIdText.getText()));
+        String tag = String.valueOf(v.getTag());
+
+        if(Integer.parseInt(tag) == -1 && currId > 1){
+            userIdText.setText(String.valueOf(currId - 1));
+        }else if(Integer.parseInt(tag) == 1){
+            userIdText.setText(String.valueOf(currId + 1));
+        }
+    }
 }
