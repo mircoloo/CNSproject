@@ -3,6 +3,7 @@ package com.example.test1ca;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -36,10 +37,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void csvWriter( String content ) throws IOException {
-        File file = new File(getFilesDir() , "data.csv");
+
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "data.csv");
         FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
         BufferedWriter bw = new BufferedWriter(fw);
-
+        Log.d("FILEDIT", String.valueOf(file.getAbsoluteFile()));
         if (!file.exists()) {
             try {
                 file.createNewFile();
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
         bw.write(content);
         bw.close();
     }
+
 
     public void initializeButtons() {
         String buttonTag = "button";
@@ -73,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         Integer[] integerNumbers = Arrays.stream(numbers).boxed().toArray(Integer[]::new);
 
 //        Shuffle the array
-        Collections.shuffle(Arrays.asList(integerNumbers));
+        //Collections.shuffle(Arrays.asList(integerNumbers));
 
 //        setId() for each button in ascending order
         int id=0;
@@ -175,11 +178,12 @@ public class MainActivity extends AppCompatActivity {
         double touchMinor = event.getTouchMinor();
         double ellipseArea = (3.1415*(touchMajor*0.5)*(touchMinor*0.5));
 
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            toDisplay =   "X:" + event.getX() + "\n Y:" + event.getY() + "\n"
+        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            toDisplay =   "{X:" + event.getX() + ",Y:" + event.getY() + "}\n"
                     + " GTM: " + touchMajor + ", GTm: " + touchMinor
                     + "\ngetSize " + event.getSize() +
                     "\nEllipse Area : " + ellipseArea + "\n Actual Area : " + actualArea;
+
             Log.d("TouchEvent", event.getPressure() +  " (" + event.getX() + "," + event.getY() + ")");
             Log.d("TouchEvent",  "GetSize() --- Size (%): " + event.getSize() + ", Size (px): " + actualArea);
             Log.d("TouchEvent",  "GetTouchMajor() GetTouchMinor() --- GetTouchMajor: " + touchMajor + ", GetTouchMinor: " + touchMinor + ", Size (px): " + ellipseArea);
