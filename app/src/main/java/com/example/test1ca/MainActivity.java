@@ -30,10 +30,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    static String PIN = "749215";
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,13 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
         String textToWrite = String.valueOf(displayText.getText()) + String.valueOf(b.getText());
 
-        if(textToWrite.length() >= PIN.length()){
-            if(textToWrite.equals(PIN)){
-                Log.d("PINRESULT", "Correct PIN");
-            }
-            else{
-                Log.d("PINRESULT", "Wrong PIN");
-            }
+        if(textToWrite.length() >= 4 ){
             textToWrite = "";
             initializeButtons();
         }
@@ -160,12 +150,8 @@ public class MainActivity extends AppCompatActivity {
         String toDisplay = String.valueOf(displayData.getText());
         String toWrite = "";
 
-        // Calcola il numero di pixel toccati utilizzando la grandezza totale dello schermo
-        //int screenWidth = displayMetrics.widthPixels; // Larghezza totale dello schermo in pixel
-        //int screenHeight = displayMetrics.heightPixels; // Altezza totale dello schermo in pixel
-//        int totalPixels = screenWidth * screenHeight;
-//        float actualArea = event.getSize() * totalPixels;
 
+        //Height, Width, actualArea
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height=0;
@@ -181,13 +167,19 @@ public class MainActivity extends AppCompatActivity {
         float actualArea = event.getSize() * totalPixels;
 
 
-        //estimated area size using the ellipse axis
+        //Ellispse: estimated area size using axis
         double touchMajor = event.getTouchMajor();
         double touchMinor = event.getTouchMinor();
         double ellipseArea = (Math.PI*(touchMajor*0.5)*(touchMinor*0.5));
-        double ellipseAreamm =areaFromPxToMm(ellipseArea);
+        double ellipseAreamm =areaFromPxtoMm2((float) width, (float) height, (float) ellipseArea);
+
+
+        //userID
         TextView userIdText = findViewById(R.id.selected_number);
         String usId = String.valueOf(userIdText.getText());
+
+        //Area pX->mm^2
+        float areamm = areaFromPxtoMm2(width, height, actualArea);
 
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             toDisplay =   "{X:" + event.getX() + ",Y:" + event.getY() + "}\n"
@@ -256,8 +248,30 @@ public class MainActivity extends AppCompatActivity {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
         double densityPPI = DisplayMetrics.DENSITY_DEFAULT * metrics.density; //convert dp into pixel per inch
         double densityPPMM = densityPPI / 25.4; // convert from ppi into ppmm
+
+        Log.d("metrics.density", String.valueOf(metrics.density));
+
         return areaInPx / (densityPPMM  * densityPPMM); //scale are from pixel^2 into mm^2
+
+    }
+
+    public float areaFromPxtoMm2(float width, float height, float area){
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        //pixel to inches conversion
+        float widthInches = width / displayMetrics.xdpi;
+        float heightInches = height / displayMetrics.ydpi;
+        float diagonalInches = (float) Math.sqrt(Math.pow(widthInches, 2) + Math.pow(heightInches, 2));
+        float ppi = (float) Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)) / diagonalInches;
+        float ppmm = (float) (ppi/25.4);
+        float areamm= (float) (area/Math.pow(ppmm, 2));
+
+        Log.d("areatopx", "ppi: "+ppi+ "ppmm: "+ppmm+"areapxtomm: "+ areamm);
+
+        return areamm;
     }
 }
