@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(file.length()<=0){
-            bw.write("UsID, X,Y, GTM, GTm, EA, EAmmcfr,AA, bID\n");
+            bw.write("UsID, X,Y, GTM, GTm, EA, EAmm, AA, bID\n");
         }
 
         bw.write(content);
@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
         TextView userIdText = findViewById(R.id.selected_number);
         String usId = String.valueOf(userIdText.getText());
 
-        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
             toDisplay =   "{X:" + event.getX() + ",Y:" + event.getY() + "}\n"
                     + " GTM: " + touchMajor + ", GTm: " + touchMinor
                     + "\ngetSize " + event.getSize() +
@@ -254,6 +254,8 @@ public class MainActivity extends AppCompatActivity {
 
     public double areaFromPxToMm(double areaInPx){
         DisplayMetrics metrics = getResources().getDisplayMetrics();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         double densityPPI = DisplayMetrics.DENSITY_DEFAULT * metrics.density; //convert dp into pixel per inch
         double densityPPMM = densityPPI / 25.4; // convert from ppi into ppmm
         return areaInPx / (densityPPMM  * densityPPMM); //scale are from pixel^2 into mm^2
