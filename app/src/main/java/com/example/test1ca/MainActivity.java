@@ -12,6 +12,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.content.Context;
+import android.util.DisplayMetrics;
+import android.view.MotionEvent;
+import android.view.WindowManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -26,7 +30,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    static String PIN = "1234";
+    static String PIN = "749215";
 
 
 
@@ -43,7 +47,9 @@ public class MainActivity extends AppCompatActivity {
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "data.csv");
         FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
         BufferedWriter bw = new BufferedWriter(fw);
+
         Log.d("FILEDIT", String.valueOf(file.getAbsoluteFile()));
+
         if (!file.exists()) {
             try {
                 file.createNewFile();
@@ -53,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(file.length()<=0){
-            bw.write("UsID, X,Y, GTM, GTm, EA, AA, bID\n");
+            bw.write("UsID, X,Y, GTM, GTm, EA, EAmmcfr,AA, bID\n");
         }
 
         bw.write(content);
@@ -129,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 //        displayIds.setText(idsDisplay);
 
         Log.d("button_ID", String.valueOf(b.getId()));
-        csvWriter(String.valueOf(b.getId())+ "\n");
+        csvWriter(String.valueOf(b.getId()) + "\n");
 
         String textToWrite = String.valueOf(displayText.getText()) + String.valueOf(b.getText());
 
@@ -171,14 +177,15 @@ public class MainActivity extends AppCompatActivity {
         }
         int width = displayMetrics.widthPixels;
 
-        int totalPixels = height + width;
+        int totalPixels = height * width;
         float actualArea = event.getSize() * totalPixels;
 
 
         //estimated area size using the ellipse axis
         double touchMajor = event.getTouchMajor();
         double touchMinor = event.getTouchMinor();
-        double ellipseArea = (3.1415*(touchMajor*0.5)*(touchMinor*0.5));
+        double ellipseArea = (Math.PI*(touchMajor*0.5)*(touchMinor*0.5));
+        double ellipseAreamm =areaFromPxToMm(ellipseArea);
         TextView userIdText = findViewById(R.id.selected_number);
         String usId = String.valueOf(userIdText.getText());
 
@@ -186,17 +193,19 @@ public class MainActivity extends AppCompatActivity {
             toDisplay =   "{X:" + event.getX() + ",Y:" + event.getY() + "}\n"
                     + " GTM: " + touchMajor + ", GTm: " + touchMinor
                     + "\ngetSize " + event.getSize() +
-                    "\nEllipse Area : " + ellipseArea + "\n Actual Area : " + actualArea;
+                    "\nEllipse Area (px^2): " + ellipseArea + "\n Ellipse Area (mm^2): " + String.format("%.2f", ellipseAreamm) + "\n Actual Area : " + actualArea;
 
             Log.d("TouchEvent", event.getPressure() +  " (" + event.getX() + "," + event.getY() + ")");
             Log.d("TouchEvent",  "GetSize() --- Size (%): " + event.getSize() + ", Size (px): " + actualArea);
             Log.d("TouchEvent",  "GetTouchMajor() GetTouchMinor() --- GetTouchMajor: " + touchMajor + ", GetTouchMinor: " + touchMinor + ", Size (px): " + ellipseArea);
+
             toWrite = usId + ","
                     + event.getX() + ","
                     + event.getY() + ","
                     + touchMajor + ","
                     + touchMinor + ","
                     + ellipseArea + ","
+                    + String.format("%.2f", ellipseAreamm) + ","
                     + actualArea + ",";
             try {
                 csvWriter(toWrite);
@@ -241,5 +250,12 @@ public class MainActivity extends AppCompatActivity {
         }else if(Integer.parseInt(tag) == 1){
             userIdText.setText(String.valueOf(currId + 1));
         }
+    }
+
+    public double areaFromPxToMm(double areaInPx){
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        double densityPPI = DisplayMetrics.DENSITY_DEFAULT * metrics.density; //convert dp into pixel per inch
+        double densityPPMM = densityPPI / 25.4; // convert from ppi into ppmm
+        return areaInPx / (densityPPMM  * densityPPMM); //scale are from pixel^2 into mm^2
     }
 }
