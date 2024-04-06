@@ -35,16 +35,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initializeButtons();
-
     }
 
     public void csvWriter( String content ) throws IOException {
-
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "data.csv");
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "logdata.csv");
         FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
         BufferedWriter bw = new BufferedWriter(fw);
 
-        Log.d("FILEDIT", String.valueOf(file.getAbsoluteFile()));
+        //Log.d("FILEDIT", String.valueOf(file.getAbsoluteFile()));
 
         if (!file.exists()) {
             try {
@@ -68,12 +66,10 @@ public class MainActivity extends AppCompatActivity {
         ViewGroup rootLayout = findViewById(android.R.id.content);
         List<View> buttons = findViewsByTag(rootLayout, buttonTag);
 
-
         if (buttons.size() != 10) {
             Log.e("MainActivity", "Expected 10 buttons with tag 'myButton', found: " + buttons.size());
             return;
         }
-
         int[] numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
 
 //        Convert int array to Integer array
@@ -119,18 +115,11 @@ public class MainActivity extends AppCompatActivity {
         View displayTextView = findViewById(R.id.display_text);
         EditText displayText = (EditText) displayTextView;
 
-        //display_ids box
-        View displayIdsView = findViewById(R.id.display_ids);
-        EditText displayIds = (EditText) displayIdsView;
-
         //button
         Button b = (Button) v;
 
-//        String idsDisplay = String.valueOf(displayIds.getText());
-//        idsDisplay += String.valueOf(b.getId());
-//        displayIds.setText(idsDisplay);
-
-        Log.d("button_ID", String.valueOf(b.getId()));
+        //Log.d("button_ID", String.valueOf(b.getId()));
+        // Write in the csv file the buttonID (bID)
         csvWriter(String.valueOf(b.getId()) + "\n");
 
         String textToWrite = String.valueOf(displayText.getText()) + String.valueOf(b.getText());
@@ -139,21 +128,19 @@ public class MainActivity extends AppCompatActivity {
             textToWrite = "";
             initializeButtons();
         }
-        displayText.setText(textToWrite);
 
+        displayText.setText(textToWrite);
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         EditText displayData = findViewById(R.id.display_data);
-        //DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         String toDisplay = String.valueOf(displayData.getText());
         String toWrite = "";
 
-
         //Height, Width, actualArea
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        getDisplay().getMetrics(displayMetrics);
         int height=0;
         if(showNavigationBar(getResources())){
             height = displayMetrics.heightPixels + getNavigationBarHeight();
@@ -164,32 +151,42 @@ public class MainActivity extends AppCompatActivity {
         int width = displayMetrics.widthPixels;
 
         int totalPixels = height * width;
-        float actualArea = event.getSize() * totalPixels;
+        double actualArea = event.getSize() * totalPixels;
 
 
-        //Ellispse: estimated area size using axis
+        //Ellipse: estimated area size using axis
         double touchMajor = event.getTouchMajor();
         double touchMinor = event.getTouchMinor();
         double ellipseArea = (Math.PI*(touchMajor*0.5)*(touchMinor*0.5));
+
+        //ellispeArea pX->mm^2
         double ellipseAreamm =areaFromPxtoMm2((float) width, (float) height, (float) ellipseArea);
 
+        //actualArea pX->mm^2
+        double areamm = areaFromPxtoMm2(width, height, actualArea);
 
         //userID
         TextView userIdText = findViewById(R.id.selected_number);
         String usId = String.valueOf(userIdText.getText());
 
-        //Area pX->mm^2
-        float areamm = areaFromPxtoMm2(width, height, actualArea);
+        //rapporti
+        double rapporto1 = (double) (ellipseArea)/(width * height);
 
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            toDisplay =   "{X:" + event.getX() + ",Y:" + event.getY() + "}\n"
+        //assumiamo che la il tocco sia circolare: allora, sapendo l'ActuaArea posso calcolare il raggio
+        //e calcolare (r*r*pi)/(w*h) -> dovrebbe essere uguale a getSize(), in quanto è la formula inversa
+        //=> questo però confermerebbe che il tocco viene calcolato come un cerchio
+        double raggio = Math.sqrt(actualArea / Math.PI);
+        double rapporto2 = (raggio * raggio* Math.PI) / (width * height);
+
+        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            toDisplay = "{X:" + event.getX() + ",Y:" + event.getY() + "}\n"
                     + " GTM: " + touchMajor + ", GTm: " + touchMinor
-                    + "\ngetSize " + event.getSize() +
-                    "\nEllipse Area (px^2): " + ellipseArea + "\n Ellipse Area (mm^2): " + String.format("%.2f", ellipseAreamm) + "\n Actual Area : " + actualArea;
+                    + "\ngetSize " + event.getSize()
+                    + "\nEllipse Area (px^2): " + ellipseArea + "\n Ellipse Area (mm^2): " + String.format("%.2f", ellipseAreamm)
+                    + "\n Actual Area : " + actualArea
+                    + "\n Actual Area (mm^2) : " + String.format("%.2f", areamm)
+                    + "\n rapporto1: " + String.format("%.6f", rapporto1) + "\nrapporto2: " + String.format("%.6f", rapporto2);
 
-            Log.d("TouchEvent", event.getPressure() +  " (" + event.getX() + "," + event.getY() + ")");
-            Log.d("TouchEvent",  "GetSize() --- Size (%): " + event.getSize() + ", Size (px): " + actualArea);
-            Log.d("TouchEvent",  "GetTouchMajor() GetTouchMinor() --- GetTouchMajor: " + touchMajor + ", GetTouchMinor: " + touchMinor + ", Size (px): " + ellipseArea);
 
             toWrite = usId + ","
                     + event.getX() + ","
@@ -197,23 +194,25 @@ public class MainActivity extends AppCompatActivity {
                     + touchMajor + ","
                     + touchMinor + ","
                     + ellipseArea + ","
-                    + String.format("%.2f", ellipseAreamm) + ","
+                    + ellipseAreamm+ ","
                     + actualArea + ",";
             try {
                 csvWriter(toWrite);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
+            Log.d("TouchEvent", event.getPressure() +  " (" + event.getX() + "," + event.getY() + ")");
+            Log.d("TouchEvent",  "GetSize: " + event.getSize() + ", actualArea: " + actualArea);
+            Log.d("TouchEvent",  " GetTouchMajor: " + touchMajor + ", GetTouchMinor: " + touchMinor + ", Size (px): " + ellipseArea);
+
+
         }
-
-
-
         displayData.setText(toDisplay);
 
         return super.dispatchTouchEvent(event);
     }
-    public boolean showNavigationBar(Resources resources)
-    {
+    public boolean showNavigationBar(Resources resources){
         int id = resources.getIdentifier("config_showNavigationBar", "bool", "android");
         return id > 0 && resources.getBoolean(id);
     }
@@ -231,7 +230,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return 0;
     }
-
     public void changeUser(View v) {
         TextView userIdText = findViewById(R.id.selected_number);
         int currId = Integer.parseInt(String.valueOf(userIdText.getText()));
@@ -243,7 +241,6 @@ public class MainActivity extends AppCompatActivity {
             userIdText.setText(String.valueOf(currId + 1));
         }
     }
-
     public double areaFromPxToMm(double areaInPx){
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -257,8 +254,7 @@ public class MainActivity extends AppCompatActivity {
         return areaInPx / (densityPPMM  * densityPPMM); //scale are from pixel^2 into mm^2
 
     }
-
-    public float areaFromPxtoMm2(float width, float height, float area){
+    public float areaFromPxtoMm2(float width, float height, double area){
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -270,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
         float ppmm = (float) (ppi/25.4);
         float areamm= (float) (area/Math.pow(ppmm, 2));
 
-        Log.d("areatopx", "ppi: "+ppi+ "ppmm: "+ppmm+"areapxtomm: "+ areamm);
+        //Log.d("areatopx", "ppi: "+ppi+ "ppmm: "+ppmm+"areapxtomm: "+ areamm);
 
         return areamm;
     }

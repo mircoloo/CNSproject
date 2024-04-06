@@ -6,14 +6,6 @@
     android:gravity="center"
     android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/display_ids"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:enabled="false"
-        android:gravity="center_horizontal"
-        android:padding="16dp"
-        android:textSize="20sp" />
 
     <EditText
         android:id="@+id/display_data"
